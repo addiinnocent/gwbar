@@ -38,11 +38,21 @@
 ## Client state
 
 - Teams/builds live in **localStorage only** (`'current'`, `'teams'`, one key per team). Don't add server writes for user content without a deliberate product decision.
-- Empty skill slots use the `noSkill` placeholder with **negated IDs per slot** — filtering must account for that.
+- Empty skill slots use the `noSkill` placeholder with **negated IDs per slot** (`-(index + 1)`) — filtering must account for that. Never insert `noSkill` as-is: `id: 0` collides across slots and dnd-kit's droppable registry then misroutes drops. Always spread-and-replace the id.
 - `updateBuild` re-encodes the template on every change; treat the template string as derived state, never edit it directly.
+
+## Drag & drop (dnd-kit)
+
+- Sortable items need **stable, unique ids and React keys** (`key={skill.id}`, not index) — index keys leave stale droppable registrations behind on reorder.
+- TouchSensor/PointerSensor need an **`activationConstraint`** (currently `delay: 250/tolerance: 5` and `150/5`); unconstrained sensors hijack touch scrolling on mobile.
+- Any drag state (`activeSkill`, drag-start toast with `duration: Infinity`) must be cleared in **both** `onDragEnd` and `onDragCancel` — mobile drags cancel often (browser takes over scrolling); missing cleanup locks the UI.
+- **dnd-kit core 6.3.1 caches droppable rects and only re-measures mid-drag** (issue #1786). After any programmatic list mutation (add/throw/swap), re-measure via `src/components/dnd/Remeasure.tsx` — if hit areas drift from visuals again, check that it's still mounted inside `DndContext` and still keyed on both lists.
+- Use explicit 1D sorting strategies (`verticalListSortingStrategy` / `horizontalListSortingStrategy`) — the default `rectSortingStrategy` computes grid-style displacement transforms.
+- Hide the source item while dragging (`isDragging → opacity: 0`) when using `DragOverlay`; don't re-add `snapCenterToCursor` — it moves the real item under the cursor and pollutes measurements.
 
 ## UI conventions
 
+- **User-facing changes go in the changelog** — `src/app/changelog/page.tsx` (`/changelog` route) holds a hardcoded inline array; prepend new rows with branch/version, short description, status (`live`/`pending` until merged), and a `DD/MM/YYYY HH:MM` timestamp. No DB/git integration.
 - Style via `src/components/common/` wrappers (tailwind-variants); don't style Radix primitives inline.
 - Skill images: 100px versions from `gw_images_large`; profession icons from `class_icons` (`{Name_en}-tango-icon-200.png`).
 - New UI text goes in English — the de columns exist but the UI doesn't consume them yet.

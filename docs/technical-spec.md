@@ -54,13 +54,18 @@ Client-only context:
 | `/[slot]/<Profession>` ×10 | dynamic (`searchParams`) | server component; queries professions, attributes (`profession in [0, primary, secondary]`), skills; renders SkillWindow |
 | `/build/[slug]` | dynamic | slug = raw template code; decoded server-side via `fromUrl` |
 | `/teams`, `/teams/[slug]` | client | localStorage-backed via TeamContext |
-| `/changelog` | static | hardcoded inline array, no DB/git integration |
+| `/changelog` | static | hardcoded inline array in `page.tsx` — user-facing changes are logged here manually (status `pending` until the PR is live), no DB/git integration |
 
 The 10 profession pages are **hardcoded copies** (one per profession) — adding a profession means adding a page. Prerendering hits the live Neon DB (`DATABASE_URL` from `.env`).
 
 ## Frontend stack
 
-- **dnd-kit** (`core`/`sortable`/`modifiers`/`utilities`) for list→bar drag; sensors: pointer, touch, keyboard; `closestCenter` + `snapCenterToCursor`; swap/remove logic in `SkillWindow.tsx`
+- **dnd-kit** (`core`/`sortable`/`modifiers`/`utilities`) for list→bar drag; sensors: pointer, touch, keyboard; `closestCenter`; swap/remove logic in `SkillWindow.tsx`
+  - TouchSensor activates on **long-press** (`delay: 250, tolerance: 5`), PointerSensor on `delay: 150` — without constraints, touch scrolling gets hijacked into drags (mobile bug).
+  - `onDragCancel` must reset `activeSkill` and dismiss the drag toast — cancelled touch drags otherwise leave the overlay + infinite toast blocking the UI.
+  - Empty slots must get **unique negative ids** (`-(index + 1)`) — sharing `noSkill` verbatim creates duplicate droppable ids, which breaks dnd-kit's registry and makes drops land in wrong slots.
+  - **Known dnd-kit bug (#1786, core 6.3.1):** dnd-kit only re-measures droppable rects when items change *mid-drag*. Our lists mutate programmatically in `onDragEnd` (add/throw/swap), so the rect cache goes stale and hit areas diverge from visuals. Mitigated by `src/components/dnd/Remeasure.tsx` (child of `DndContext`, calls `measureDroppableContainers` ~350ms after any list change — deferred so mid-transition rects aren't captured).
+  - Explicit sorting strategies: `verticalListSortingStrategy` (skills list), `horizontalListSortingStrategy` (build bar). No `snapCenterToCursor` — redundant with `DragOverlay` and it shifts the real list item under the cursor mid-drag.
 - **Radix primitives** (accordion, dialog, select, toast, slot) wrapped by shadcn/Tremor-style components in `src/components/common/`
 - **tailwind-variants + clsx + tailwind-merge** for styling; **@remixicon/react** icons; `@vercel/analytics` in root layout
 
