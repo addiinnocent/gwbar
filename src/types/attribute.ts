@@ -1,0 +1,16 @@
+export enum Attribute {
+  FastCasting, IllusionMagic, DominationMagic, InspirationMagic,
+  BloodMagic, DeathMagic, SoulReaping, Curses,
+  AirMagic, EarthMagic, FireMagic, WaterMagic, EnergyStorage,
+  HealingPrayers, SmitingPrayers, ProtectionPrayers, DivineFavor,
+  Strength, AxeMastery, HammerMastery, Swordsmanship, Tactics,
+  BeastMastery, Expertise, WildernessSurvival, Marksmanship,
+  DaggerMastery = 29, DeadlyArts, ShadowArts,
+  Communing, RestorationMagic, ChannelingMagic,
+  CriticalStrikes, SpawningPower,
+  SpearMastery, Command, Motivation, Leadership,
+  ScytheMastery, WindPrayers, EarthPrayers, Mysticism,
+  NornRank = 214, EbonVanguardRank, DeldrimorRank, AsuraRank,
+  LightbringerRank = 235, SunspearRank = 238,
+  LuxonRank = 249, KurzickRank,
+}

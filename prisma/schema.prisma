@@ -1,0 +1,96 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  previewFeatures = ["driverAdapters"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  //directUrl = env("DATABASE_URL_UNPOOLED")
+}
+
+
+model Gw1Profession {
+  id        Int     @id
+  name_de   String  @db.Text
+  name_en   String  @db.Text
+  abbr_de   String  @db.Text
+  abbr_en   String  @db.Text
+  desc_de   String  @db.Text
+  desc_en   String  @db.Text
+  armor     Int     @default(0)
+  bonus_de  String  @db.Text
+  bonus_en  String  @db.Text
+  chest_de  String  @db.Text
+  chest_en  String  @db.Text
+  hand_de   String  @db.Text
+  hand_en   String  @db.Text
+  leg_de    String  @db.Text
+  leg_en    String  @db.Text
+  foot_de   String  @db.Text
+  foot_en   String  @db.Text
+
+  @@map("gw1_professions")
+}
+
+model Gw1Attribute {
+  id         Int     @id
+  name_de    String  @db.Text
+  name_en    String  @db.Text
+  desc_de    String  @db.Text
+  desc_en    String  @db.Text
+  abbr       String  @db.Text
+  primary    Int     @default(0)
+  max        Int     @default(21)
+  profession Int     @default(0)
+
+  @@map("gw1_attributes")
+}
+
+model Gw1SkillDesc {
+  id          Int     @id @default(autoincrement())
+  pve_name    String
+  pve_desc    String
+  pve_concise String
+  pvp_name    String
+  pvp_desc    String
+  pvp_concise String
+
+  @@map("gw1_skilldesc")
+}
+
+model Gw1SkillData {
+  id             Int     @id @default(autoincrement()) @db.SmallInt
+  campaign       Int     @default(0) @db.SmallInt
+  profession     Int     @default(0) @db.SmallInt
+  attribute      Int     @default(0) @db.SmallInt
+  elite          Int     @default(0) @db.SmallInt
+  rp             Int     @default(0) @db.SmallInt
+  player         Int     @default(0) @db.SmallInt
+  split          Int     @default(0) @db.SmallInt
+  pve_type       Int     @default(0) @db.SmallInt
+  pve_upkeep     Int     @default(0) @db.SmallInt
+  pve_energy     Int     @default(0) @db.SmallInt
+  pve_activation Decimal @default("0.00") @db.Decimal(4, 2)
+  pve_recharge   Int     @default(0) @db.SmallInt
+  pve_adrenaline Int     @default(0) @db.SmallInt
+  pve_sacrifice  Int     @default(0) @db.SmallInt
+  pve_overcast   Int     @default(0) @db.SmallInt
+  pvp_type       Int     @default(0) @db.SmallInt
+  pvp_upkeep     Int     @default(0) @db.SmallInt
+  pvp_energy     Int     @default(0) @db.SmallInt
+  pvp_activation Decimal @default("0.00") @db.Decimal(4, 2)
+  pvp_recharge   Int     @default(0) @db.SmallInt
+  pvp_adrenaline Int     @default(0) @db.SmallInt
+  pvp_sacrifice  Int     @default(0) @db.SmallInt
+  pvp_overcast   Int     @default(0) @db.SmallInt
+
+  @@map("gw1_skilldata")
+}
+
