@@ -28,6 +28,8 @@ Seed/reference data: `sql/gw1_*.sql` (Postgres dialect, `TRUNCATE` + `INSERT`; a
 
 Upstream source: [`build-wars/gw-skilldata`](https://github.com/build-wars/gw-skilldata) (`data/json-full/skilldata.json` + `skilldesc-en.json`) — wiki-derived, keyed by real game skill IDs, actively maintained. Last synced: **2026-09-30** game balance patch (skill type IDs 38–42 = Touch variants; 33 = Flash Enchantment; skill IDs 3422–3431 are the renumbered 2026 anniversary elites).
 
+Upstream quirk: PvE title-track attribute IDs are renumbered upstream (905=Kurzick, 906=Luxon, 917=Sunspear, 920=Lightbringer, 938=Asura, 939=Deldrimor, 940=Vanguard, 941=Norn). Our `gw1Attribute` table uses the legacy negative title-track IDs (−9…−1), so re-syncing skills requires remapping those attribute IDs (done 29/10/2026 in the DB + dump; otherwise all PvE-rank skills silently disappear from the editors).
+
 ## Guild Wars template codec
 
 Implements the **official GW1 skill template format** (template type 14, version 0):
