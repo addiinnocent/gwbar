@@ -137,11 +137,11 @@ export default async function Changelog() {
       author: 'Der Dachs',
       status: 'live',
       lastEdited: '17/02/2025 13:20'
-    }, { //STILL TO DO!!!!
+    }, {
       branch: '1.2',
       commit: 'Update anniversary elite ids',
       author: 'Der Dachs',
-      status: 'pending',
+      status: 'live',
       lastEdited: '16/02/2025 19:53'
     }, {
       branch: '1.3',
@@ -159,37 +159,37 @@ export default async function Changelog() {
       branch: '1.4',
       commit: 'Fixed mobile drag & drop: touch scrolling no longer starts drags',
       author: 'addiinnocent',
-      status: 'pending',
+      status: 'live',
       lastEdited: '29/10/2026 12:00'
     }, {
       branch: '1.4',
       commit: 'Fixed drop zones locking or landing in wrong slots',
       author: 'addiinnocent',
-      status: 'pending',
+      status: 'live',
       lastEdited: '29/10/2026 12:00'
     }, {
       branch: '1.4',
       commit: 'Fixed hit areas drifting from the skill list after drops (dnd-kit re-measuring)',
       author: 'addiinnocent',
-      status: 'pending',
+      status: 'live',
       lastEdited: '29/10/2026 12:00'
     }, {
       branch: '1.4',
       commit: 'Dragged skill icon now attaches to the pointer outside the list',
       author: 'addiinnocent',
-      status: 'pending',
+      status: 'live',
       lastEdited: '29/10/2026 12:00'
     }, {
       branch: '1.5',
       commit: 'Attribute points shown in the team view',
       author: 'addiinnocent',
-      status: 'pending',
+      status: 'live',
       lastEdited: '29/10/2026 14:30'
     }, {
       branch: '1.5',
       commit: 'Share teams and builds via URL',
       author: 'addiinnocent',
-      status: 'pending',
+      status: 'live',
       lastEdited: '29/10/2026 14:30'
     },
   ];
