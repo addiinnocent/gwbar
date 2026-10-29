@@ -22,13 +22,13 @@ import {
 import {
   DndContext,
   KeyboardSensor,
-  PointerSensor,
   TouchSensor,
   useSensor,
   useSensors,
   DragOverlay,
   closestCenter,
 } from '@dnd-kit/core';
+import { MouseSensor } from '@/components/dnd/MouseSensor';
 import {
   snapCenterToCursor,
 } from '@dnd-kit/modifiers';
@@ -79,16 +79,17 @@ export default function SkillWindow({
   );
 
   const sensors = useSensors(
+    // mouse-only: touch pointers are handled exclusively by the TouchSensor
+    // (a PointerSensor-activated drag gets pointercancelled by browser panning)
+    useSensor(MouseSensor, {
+      activationConstraint: {
+        distance: 4,
+      },
+    }),
     useSensor(TouchSensor, {
       activationConstraint: {
         delay: 250,
-        tolerance: 5,
-      },
-    }),
-    useSensor(PointerSensor, {
-      activationConstraint: {
-        delay: 150,
-        tolerance: 5,
+        tolerance: 8,
       },
     }),
     useSensor(KeyboardSensor, {
