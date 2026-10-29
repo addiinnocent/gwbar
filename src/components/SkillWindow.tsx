@@ -22,6 +22,7 @@ import {
 import {
   DndContext,
   KeyboardSensor,
+  MeasuringStrategy,
   TouchSensor,
   useSensor,
   useSensors,
@@ -231,6 +232,10 @@ export default function SkillWindow({
     <DndContext
       sensors={sensors}
       collisionDetection={closestCenter}
+      // droppable rects must be re-measured while dragging: the sortable shift
+      // animation displaces bar slots to make room for the incoming skill, and
+      // stale cached rects make drops land several slots off (mobile touch)
+      measuring={{ droppable: { strategy: MeasuringStrategy.Always } }}
       onDragStart={handleDragStart}
       onDragEnd={handleDragEnd}
       onDragCancel={handleDragCancel}
