@@ -191,6 +191,18 @@ export default async function Changelog() {
       author: 'addiinnocent',
       status: 'live',
       lastEdited: '29/10/2026 14:30'
+    }, {
+      branch: '1.6',
+      commit: 'PvE rank skills back in the editor list',
+      author: 'addiinnocent',
+      status: 'pending',
+      lastEdited: '29/10/2026 17:00'
+    }, {
+      branch: '1.6',
+      commit: 'Drops in the skill bar land on the aimed slot on mobile',
+      author: 'addiinnocent',
+      status: 'pending',
+      lastEdited: '29/10/2026 17:00'
     },
   ];
   data.reverse();

@@ -108,10 +108,22 @@ export default function SkillWindow({
     }
   }
 
+  function switchItemToIndex(active: Active, index: number) {
+    setBuild((items) => {
+      const oldIndex = items.findIndex(x => x.id === active.id);
+      if (oldIndex === -1 || oldIndex === index) return items;
+      return arrayMove(items, oldIndex, index);
+    });
+  }
+
   function addItem(active: Active, over: Over) {
-    const item = skills.find((x) => x.id == active.id);
     const index = over.data.current?.sortable.index;
-    if (item && index !== undefined) {
+    if (index !== undefined) addItemToIndex(active, index);
+  }
+
+  function addItemToIndex(active: Active, index: number) {
+    const item = skills.find((x) => x.id == active.id);
+    if (item) {
       const replaced = build[index];
       const elite = build.filter(x => x.elite);
       const pve = build.filter(x => x.rp);
@@ -130,6 +142,22 @@ export default function SkillWindow({
         return updatedArray;
       });
     }
+  }
+
+  /**
+   * Resolve the drop slot from the live bar geometry instead of dnd-kit's
+   * cached droppable rects: while hovering, slots displace to make room and
+   * cached rects drift (notably on mobile), so drops landed several slots off.
+   */
+  function barIndexAt(active: Active): number | null {
+    const bar = document.getElementById('gw-skill-bar');
+    const translated = active.rect.current.translated;
+    if (!bar || !translated) return null;
+    const rect = bar.getBoundingClientRect();
+    const x = translated.left + translated.width / 2;
+    if (x < rect.left || x > rect.right) return null;
+    const slotWidth = rect.width / 8;
+    return Math.min(7, Math.max(0, Math.floor((x - rect.left) / slotWidth)));
   }
 
   function throwItem(active: Active) {
@@ -182,8 +210,19 @@ export default function SkillWindow({
   function handleDragEnd(event: DragEndEvent) {
     dismissToast();
     const { active, over } = event;
-    if (over) {
-      const activeContainer = active.data?.current?.sortable?.containerId;
+    const activeContainer = active.data?.current?.sortable?.containerId;
+
+    // drop slot from live bar geometry — cached rects drift while slots
+    // displace mid-drag (mobile drops landed several slots off)
+    const targetIndex = barIndexAt(active);
+
+    if (targetIndex !== null) {
+      if (activeContainer === 'build') {
+        switchItemToIndex(active, targetIndex);
+      } else {
+        addItemToIndex(active, targetIndex);
+      }
+    } else if (over) {
       const overContainer = over.data?.current?.sortable?.containerId;
       if (activeContainer === 'build' && overContainer === 'build') { //switch item
         switchItem(active, over);
