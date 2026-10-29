@@ -23,6 +23,9 @@ export function SortableItem(props: SortableItemProps) {
     transform: CSS.Transform.toString(transform),
     transition,
     opacity: isDragging ? 0 : undefined,
+    // allow touch scrolling (pan) but suppress double-tap zoom during the
+    // TouchSensor long-press; `none` would break scrolling the skill list
+    touchAction: 'manipulation' as const,
   };
   
   return (

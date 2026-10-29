@@ -20,6 +20,9 @@ body {
   font-family: Arial, Helvetica, sans-serif;
   user-select: none;
   webkit-user-select: none;
+  /* iOS long-press on skill images must not open the preview/share callout
+     mid-drag */
+  -webkit-touch-callout: none;
 }
 
 img {
