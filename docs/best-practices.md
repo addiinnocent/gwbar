@@ -52,6 +52,7 @@
 
 ## UI conventions
 
+- **User-facing changes go in the changelog** — `src/app/changelog/page.tsx` (`/changelog` route) holds a hardcoded inline array; prepend new rows with branch/version, short description, status (`live`/`pending` until merged), and a `DD/MM/YYYY HH:MM` timestamp. No DB/git integration.
 - Style via `src/components/common/` wrappers (tailwind-variants); don't style Radix primitives inline.
 - Skill images: 100px versions from `gw_images_large`; profession icons from `class_icons` (`{Name_en}-tango-icon-200.png`).
 - New UI text goes in English — the de columns exist but the UI doesn't consume them yet.

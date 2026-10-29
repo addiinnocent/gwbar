@@ -54,7 +54,7 @@ Client-only context:
 | `/[slot]/<Profession>` ×10 | dynamic (`searchParams`) | server component; queries professions, attributes (`profession in [0, primary, secondary]`), skills; renders SkillWindow |
 | `/build/[slug]` | dynamic | slug = raw template code; decoded server-side via `fromUrl` |
 | `/teams`, `/teams/[slug]` | client | localStorage-backed via TeamContext |
-| `/changelog` | static | hardcoded inline array, no DB/git integration |
+| `/changelog` | static | hardcoded inline array in `page.tsx` — user-facing changes are logged here manually (status `pending` until the PR is live), no DB/git integration |
 
 The 10 profession pages are **hardcoded copies** (one per profession) — adding a profession means adding a page. Prerendering hits the live Neon DB (`DATABASE_URL` from `.env`).
 
