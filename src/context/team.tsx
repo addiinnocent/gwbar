@@ -13,19 +13,25 @@ import { encode } from '@/actions/encode';
 
 //maybe split team and player context
 
+export type PlayerPatch = Partial<Pick<Player, 'second' | 'attributes' | 'name'>>;
+
 type TeamContextType = {
   team: Player[];
   teams: Team[],
+  current: string,
   newPlayer: (id: number,
     first: string,
     second?: string,
     build?: Gw1Skill[],
     template?: string,
+    attributes?: Record<string, number>,
+    name?: string,
   ) => void;
-  newTeam: () => void;
+  newTeam: () => Team;
   selectTeam: (title: string) => void;
+  renameTeam: (title: string, newTitle: string) => void;
   updateBuild: (id: number, build: Gw1Skill[]) => void;
-  updatePlayer: (id: number, second: string) => void;
+  updatePlayer: (id: number, patch: PlayerPatch) => void;
   dropPlayer: (id: number) => void;
   dropTeam: (title: string) => void;
 }
@@ -40,6 +46,26 @@ const time = () => {
     hour12: false,
   });
 }
+
+const sanitizeAttributes = (attributes: unknown): Record<string, number> => {
+  if (!attributes || typeof attributes !== 'object') return {};
+  return Object.fromEntries(
+    Object.entries(attributes as Record<string, unknown>)
+      .map(([id, rank]) => [id, Number(rank)] as [string, number])
+      .filter(([id, rank]) => Number.isInteger(Number(id)) && Number(id) >= 0 && rank > 0)
+  );
+}
+
+// migrate players saved by older versions (drops stale fields like `count`)
+const normalizePlayer = (player: Player): Player => ({
+  id: player.id,
+  first: player.first,
+  second: player.second,
+  attributes: sanitizeAttributes(player.attributes),
+  name: typeof player.name === 'string' ? player.name : '',
+  build: player.build,
+  template: player.template,
+});
 
 export const TeamContext = createContext<TeamContextType>(
   {} as TeamContextType
@@ -61,6 +87,8 @@ export const TeamProvider = ({
     second: string = 'none',
     build: Gw1Skill[] = Array.from({ length: 8 }, (_, i) => ({ ...noSkill, id: -(i + 1)})),
     template: string = 'OQAAAAAwAAsgAAgA',
+    attributes: Record<string, number> = {},
+    name: string = '',
   ) => {
     if (!current.length) {
       const result = newTeam();
@@ -69,11 +97,12 @@ export const TeamProvider = ({
     setTeam(prev => {
       const exists = prev.some((player) => player.id === id);
       if (!exists) {
-        const player = {
+        const player: Player = {
           id: id,
           first: first,
           second: second,
-          attributes: {},
+          attributes: attributes,
+          name: name,
           build: build,
           template: template,
         }
@@ -81,7 +110,7 @@ export const TeamProvider = ({
       } else {
         console.warn(`Player with id ${id} already exists in the team.`);
         return prev;
-      }      
+      }
     });
   }
 
@@ -98,9 +127,29 @@ export const TeamProvider = ({
 
   const selectTeam = (title: string) => {
     const savedTeam = localStorage.getItem(title);
-    if (savedTeam) setTeam(JSON.parse(savedTeam));
+    if (savedTeam) setTeam(JSON.parse(savedTeam).map(normalizePlayer));
     else setTeam([]);
     setCurrent(title);
+  }
+
+  const renameTeam = (title: string, newTitle: string) => {
+    const trimmed = newTitle.trim();
+    if (!trimmed || trimmed === title) return;
+    if (teams.some(team => team.title === trimmed)) return;
+
+    setTeams(prev =>
+      prev.map(team =>
+        team.title === title ? { ...team, title: trimmed } : team
+      )
+    );
+    if (current === title) {
+      setCurrent(trimmed);
+      const saved = localStorage.getItem(title);
+      if (saved) {
+        localStorage.setItem(trimmed, saved);
+        localStorage.removeItem(title);
+      }
+    }
   }
 
   const updateProfessions = (title: string, professions: string[]) => {
@@ -127,19 +176,30 @@ export const TeamProvider = ({
 
   const updatePlayer = (
     id: number,
-    second: string
+    patch: PlayerPatch
   ) => {
     setTeam((prev) => prev.map(
-      player => player.id === id ? { ...player, second } : player)
-    );
+      player => {
+        if (player.id !== id) return player;
+        const updated = { ...player, ...patch };
+        // keep the template code in sync when the allocation changed
+        if (patch.attributes) {
+          updated.attributes = sanitizeAttributes(patch.attributes);
+          updated.template = encode(
+            updated.first,
+            updated.second,
+            updated.build.map(x => x.id),
+            updated.attributes,
+          );
+        }
+        return updated;
+      }
+    ));
   }
 
+  // ids are stable: removing a player leaves gaps, callers add new players at max + 1
   const dropPlayer = (id: number) => {
-    setTeam((prev) => {
-      prev = prev.filter(x => x.id !== id);
-      prev = prev.map((x, i) => ({...x, id: i+1}));
-      return prev;
-    });
+    setTeam((prev) => prev.filter(x => x.id !== id));
   }
 
   const updateBuild = (id: number, build: Gw1Skill[]) => {
@@ -149,6 +209,7 @@ export const TeamProvider = ({
         player.first,
         player.second,
         build.map(x => x.id),
+        player.attributes,
       );
       setTeam((prev) => prev.map(
         player => player.id === id ? { ...player, build, template } : player)
@@ -192,7 +253,7 @@ export const TeamProvider = ({
     if (savedCurrent) {
       const savedTeam = localStorage.getItem(savedCurrent);
       if (savedCurrent) setCurrent(savedCurrent || '');
-      if (savedTeam) setTeam(JSON.parse(savedTeam));
+      if (savedTeam) setTeam(JSON.parse(savedTeam).map(normalizePlayer));
     }
   }, []);
 
@@ -201,9 +262,11 @@ export const TeamProvider = ({
       value={{
         team,
         teams,
+        current,
         newPlayer,
         newTeam,
         selectTeam,
+        renameTeam,
         updateBuild,
         updatePlayer,
         dropPlayer,

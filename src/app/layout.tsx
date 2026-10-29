@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Script from "next/script";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Analytics } from "@vercel/analytics/react"
 import "./globals.css";
@@ -33,6 +34,12 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <Analytics/>
+        <Script
+          defer
+          src="https://analytics.performance-dudes.com/tracker.js"
+          data-site="gwskillbar-com"
+          strategy="afterInteractive"
+        />
         <TeamProvider>
           <div className="max-w-2xl mx-auto">
             {children}

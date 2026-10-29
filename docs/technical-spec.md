@@ -24,7 +24,9 @@ Four flat models, no Prisma relations — joined by integer IDs in application c
 | `Gw1SkillData` | numeric skill stats | `id` = real GW skill ID; mirrored `pve_*`/`pvp_*` columns (type, energy, activation, recharge, adrenaline, upkeep, sacrifice, overcast, …) |
 | `Gw1SkillDesc` | skill text | autoincrement id; PvE/PvP name/desc/concise (English only) |
 
-Seed/reference data: `sql/gw1_*.sql` (applied manually to Neon, not part of migrations).
+Seed/reference data: `sql/gw1_*.sql` (Postgres dialect, `TRUNCATE` + `INSERT`; applied manually to Neon, not part of migrations).
+
+Upstream source: [`build-wars/gw-skilldata`](https://github.com/build-wars/gw-skilldata) (`data/json-full/skilldata.json` + `skilldesc-en.json`) — wiki-derived, keyed by real game skill IDs, actively maintained. Last synced: **2026-09-30** game balance patch (skill type IDs 38–42 = Touch variants; 33 = Flash Enchantment; skill IDs 3422–3431 are the renumbered 2026 anniversary elites).
 
 ## Guild Wars template codec
 

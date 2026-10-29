@@ -2,7 +2,8 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
-import { useContext } from 'react'; 
+import { useRouter } from 'next/navigation';
+import { useContext } from 'react';
 import {
   Table,
   TableBody,
@@ -18,6 +19,7 @@ import { TeamContext } from '@/context/team';
 
 export default function Teams() {
   const { teams, newTeam, dropTeam } = useContext(TeamContext);
+  const router = useRouter();
 
   return (
     <main> 
@@ -92,7 +94,13 @@ export default function Teams() {
             </Table>
           </TableRoot>
 
-          <Button onClick={newTeam} className="mt-4">
+          <Button
+            onClick={() => {
+              const team = newTeam();
+              router.push(`/teams/${team.title}`);
+            }}
+            className="mt-4"
+          >
             Create a new Team
           </Button>
         </section>

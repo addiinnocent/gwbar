@@ -20,7 +20,10 @@ export default async function Page({
         Shared Build:
       </h3>
       <Card className="flex flex-row items-center gap-2">
-        <PlayerContent player={player as Player} />
+        <PlayerContent
+          player={player as unknown as Player}
+          attributeList={player.attributeList}
+        />
       </Card>
     </main>
   );

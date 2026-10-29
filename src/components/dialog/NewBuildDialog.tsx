@@ -19,6 +19,7 @@ import { TeamContext } from '@/context/team';
 
 function ProfessionList() {
   const { team } = useContext(TeamContext);
+  const nextId = team.length ? Math.max(...team.map(x => x.id)) + 1 : 1;
   const professions = [
     'Warrior',
     'Ranger',
@@ -36,7 +37,7 @@ function ProfessionList() {
     <ul role="list" className="mt-4 max-h-[400px] flex list-none flex-col gap-2 overflow-auto">
       {professions.map(profession => (
         <DialogClose key={profession} asChild>
-          <Link href={`/${team.length+1}/${profession}`}>
+          <Link href={`/${nextId}/${profession}`}>
             <Card className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800" asChild>
               <li className="flex flex-row items-center gap-4">
                 <Image

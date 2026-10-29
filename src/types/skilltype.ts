@@ -34,4 +34,9 @@ export enum SkillType {
   EbonVanguardRitual = 32,
   FlashEnchantment = 33,
   DoubleEnchantment = 34,
+  TouchSkill = 38,
+  TouchSpell = 39,
+  TouchEnchantmentSpell = 40,
+  TouchHexSpell = 41,
+  TouchSignet = 42,
 }

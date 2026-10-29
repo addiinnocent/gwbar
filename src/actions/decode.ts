@@ -92,10 +92,32 @@ async function decode(template: string) {
     return skill as Gw1Skill;
   });
 
+  const attributeIds = Object.keys(build.attributes)
+    .map(Number)
+    .filter(id => Number.isInteger(id) && id >= 0);
+
+  const attributeRows = attributeIds.length
+    ? await prisma.gw1Attribute.findMany({ where: { id: { in: attributeIds } } })
+    : [];
+
+  const attributeList = attributeIds
+    .map(id => {
+      const row = attributeRows.find(a => a.id === id);
+      return {
+        id,
+        name: row?.name_en ?? `Attribute ${id}`,
+        rank: build.attributes[id as keyof typeof build.attributes] ?? 0,
+        primary: Boolean(row?.primary),
+      };
+    })
+    .filter(a => a.rank > 0);
+
   return {
     first: first?.name_en,
     second: second?.name_en,
     build: skills,
+    attributes: build.attributes,
+    attributeList,
     template: template,
   }
 }

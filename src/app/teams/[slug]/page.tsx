@@ -1,8 +1,10 @@
 import Container from '@/components/common/Container';
 import { Button } from '@/components/common/Button';
 import TeamComponent from '@/components/TeamComponent';
+import TeamTitle from '@/components/TeamTitle';
 import NewBuildDialog from '@/components/dialog/NewBuildDialog';
 import ImportBuildDialog from '@/components/dialog/ImportBuildDialog';
+import { prisma } from '@/lib/prisma';
 
 export default async function Page({
   params,
@@ -10,19 +12,17 @@ export default async function Page({
   params: Promise<{ slug: string }>
 }) {
   const slug = (await params).slug
+  const attributes = await prisma.gw1Attribute.findMany({
+    select: { id: true, name_en: true, primary: true, profession: true },
+  });
 
   return (
-    <main> 
+    <main>
       <Container>
         <section className="mt-10 mb-4">
-          <h3 className="font-semibold text-gray-900 dark:text-gray-50">
-            {slug}
-          </h3>
-          <p className="my-1 text-sm leading-6 text-gray-600 dark:text-gray-400">
-            Overview of the skill bars in your team, create a new bar and edit existing ones.
-          </p>
+          <TeamTitle title={slug} />
 
-          <TeamComponent title={slug} />
+          <TeamComponent title={slug} attributeMap={attributes} />
 
           <span className="mt-4 flex flex-row gap-2">
             <NewBuildDialog>
