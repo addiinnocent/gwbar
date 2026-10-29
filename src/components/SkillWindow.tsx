@@ -12,6 +12,8 @@ import type { Gw1Skill } from '@/types';
 import {
   useState,
   useEffect,
+  useMemo,
+  useRef,
   useContext
 } from 'react';
 import {
@@ -28,13 +30,15 @@ import {
   closestCenter,
 } from '@dnd-kit/core';
 import {
+  snapCenterToCursor,
+} from '@dnd-kit/modifiers';
+import {
   SortableContext,
   sortableKeyboardCoordinates,
   arrayMove,
+  verticalListSortingStrategy,
+  horizontalListSortingStrategy,
 } from '@dnd-kit/sortable';
-import {
-  snapCenterToCursor,
-} from '@dnd-kit/modifiers';
 import {
   Accordion,
   AccordionContent,
@@ -50,6 +54,7 @@ import { TeamContext } from '@/context/team';
 import { noSkill } from '@/lib/noSkill';
 import { useToast } from '@/lib/useToast';
 import { getSkillTypeName } from '@/lib/skillType';
+import Remeasure from '@/components/dnd/Remeasure';
 
 export default function SkillWindow({
   profession,
@@ -60,9 +65,10 @@ export default function SkillWindow({
   attributes: Gw1Attribute[],
   allSkills: Gw1Skill[],
 }) {
-  const { toast } = useToast()
+  const { toast, dismiss } = useToast()
   const { slug } = useParams();
   const { team, newPlayer, updateBuild } = useContext(TeamContext);
+  const toastId = useRef<string | undefined>(undefined);
   const [activeSkill, setActiveSkill] = useState<Gw1Skill>();
   const [skills, setSkills] = useState<Gw1Skill[]>(allSkills);
   const [build, setBuild] = useState<Gw1Skill[]>(
@@ -70,12 +76,18 @@ export default function SkillWindow({
   );
 
   const sensors = useSensors(
-    useSensor(TouchSensor),
+    useSensor(TouchSensor, {
+      activationConstraint: {
+        delay: 250,
+        tolerance: 5,
+      },
+    }),
     useSensor(PointerSensor, {
       activationConstraint: {
-      delay: 60,
-      tolerance: 3,
-    }}),
+        delay: 150,
+        tolerance: 5,
+      },
+    }),
     useSensor(KeyboardSensor, {
       coordinateGetter: sortableKeyboardCoordinates,
     })
@@ -93,8 +105,8 @@ export default function SkillWindow({
 
   function addItem(active: Active, over: Over) {
     const item = skills.find((x) => x.id == active.id);
-    if (item) {
-      const index = over.data.current?.sortable.index;
+    const index = over.data.current?.sortable.index;
+    if (item && index !== undefined) {
       const replaced = build[index];
       const elite = build.filter(x => x.elite);
       const pve = build.filter(x => x.rp);
@@ -118,10 +130,10 @@ export default function SkillWindow({
   function throwItem(active: Active) {
     const item = build.find((x) => x.id == active.id);
     const index = active.data.current?.sortable?.index;
-    if (item) {
+    if (item && index !== undefined) {
       setBuild((items) => {
         const updatedArray = [...items];
-        updatedArray[index] = noSkill;
+        updatedArray[index] = { ...noSkill, id: -(index + 1) };
         return updatedArray;
       });
       setSkills((items) => {
@@ -131,12 +143,19 @@ export default function SkillWindow({
     }
   }
 
+  function dismissToast() {
+    if (toastId.current !== undefined) {
+      dismiss(toastId.current);
+      toastId.current = undefined;
+    }
+  }
+
   function handleDragStart(event: DragStartEvent) {
     const { active } = event;
     const skill = allSkills.find(x => x.id === active.id);
     if (skill) {
       setActiveSkill(skill);
-      toast({
+      const { id } = toast({
         title: skill?.pve_name,
         description: (
           <>
@@ -148,10 +167,12 @@ export default function SkillWindow({
         ),
         duration: Infinity,
       });
+      toastId.current = id;
     }
   }
 
   function handleDragEnd(event: DragEndEvent) {
+    dismissToast();
     const { active, over } = event;
     if (over) {
       const activeContainer = active.data?.current?.sortable?.containerId;
@@ -164,6 +185,11 @@ export default function SkillWindow({
         addItem(active, over);
       }
     }
+    setActiveSkill(noSkill);
+  }
+
+  function handleDragCancel() {
+    dismissToast();
     setActiveSkill(noSkill);
   }
 
@@ -187,17 +213,25 @@ export default function SkillWindow({
     return updateBuild(id, build)
   }, [build]);
 
+  const skillIds = useMemo(() => skills.map(x => x.id), [skills]);
+  const buildIds = useMemo(() => build.map(x => x.id), [build]);
+  const droppableIds = useMemo(
+    () => [...skillIds, ...buildIds],
+    [skillIds, buildIds]
+  );
+
   return (
     <DndContext
       sensors={sensors}
       collisionDetection={closestCenter}
       onDragStart={handleDragStart}
       onDragEnd={handleDragEnd}
+      onDragCancel={handleDragCancel}
       autoScroll={{ acceleration: 1 }}
-      modifiers={[snapCenterToCursor]}
     >
+      <Remeasure ids={droppableIds} />
       <Toaster />
-      <SortableContext id="skills" items={skills}>
+      <SortableContext id="skills" items={skills} strategy={verticalListSortingStrategy}>
         <div className="mb-20 bg-gray-100 dark:bg-gray-800">
           <Accordion type="multiple">
             {attributes.map(attribute => (
@@ -216,11 +250,11 @@ export default function SkillWindow({
         </div>
       </SortableContext>
 
-      <SortableContext id="build" items={build}>
+      <SortableContext id="build" items={build} strategy={horizontalListSortingStrategy}>
         <SkillBar build={build} />
       </SortableContext>
 
-      <DragOverlay>
+      <DragOverlay modifiers={[snapCenterToCursor]}>
         <SkillOverlay activeSkill={activeSkill} />
       </DragOverlay>
     </DndContext>

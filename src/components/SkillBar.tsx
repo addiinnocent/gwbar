@@ -19,8 +19,8 @@ export default function SkillBar({
   return (
     <div className="fixed bottom-0 pb-2 pr-8 max-w-2xl bg-white dark:bg-black">
       <div className="flex flex-row gap-1">
-        {build.map((skill, i) => (
-          <SortableItem key={i} id={skill.id}>
+        {build.map((skill) => (
+          <SortableItem key={skill.id} id={skill.id}>
             <div className="relative">
               <Image
                 src={parseSkillName(skill.pve_name)}
