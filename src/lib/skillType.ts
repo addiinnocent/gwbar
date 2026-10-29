@@ -13,9 +13,9 @@ export function getSkillTypeName(skillData: Gw1SkillData): string {
       case SkillType.Spell:
         return 'Spell';
       case SkillType.EnchantmentSpell:
-        return skillData.pve_upkeep & 0x800000
-          ? 'Flash Enchantment'
-          : 'Enchantment spell';
+        return 'Enchantment spell';
+      case SkillType.FlashEnchantment:
+        return 'Flash Enchantment';
       case SkillType.Signet:
         return 'Signet';
       case SkillType.WellSpell:
@@ -44,6 +44,16 @@ export function getSkillTypeName(skillData: Gw1SkillData): string {
         return 'Weapon Spell';
       case SkillType.Form:
         return 'Form';
+      case SkillType.TouchSkill:
+        return 'Touch Skill';
+      case SkillType.TouchSpell:
+        return 'Touch Spell';
+      case SkillType.TouchEnchantmentSpell:
+        return 'Touch Enchantment Spell';
+      case SkillType.TouchHexSpell:
+        return 'Touch Hex Spell';
+      case SkillType.TouchSignet:
+        return 'Touch Signet';
       case SkillType.Chant:
         return 'Chant';
       case SkillType.Echo:
