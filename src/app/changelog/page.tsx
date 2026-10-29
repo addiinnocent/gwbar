@@ -158,25 +158,25 @@ export default async function Changelog() {
     }, {
       branch: '1.4',
       commit: 'Fixed mobile drag & drop: touch scrolling no longer starts drags',
-      author: 'Der Dachs',
+      author: 'addiinnocent',
       status: 'pending',
       lastEdited: '29/10/2026 12:00'
     }, {
       branch: '1.4',
       commit: 'Fixed drop zones locking or landing in wrong slots',
-      author: 'Der Dachs',
+      author: 'addiinnocent',
       status: 'pending',
       lastEdited: '29/10/2026 12:00'
     }, {
       branch: '1.4',
       commit: 'Fixed hit areas drifting from the skill list after drops (dnd-kit re-measuring)',
-      author: 'Der Dachs',
+      author: 'addiinnocent',
       status: 'pending',
       lastEdited: '29/10/2026 12:00'
     }, {
       branch: '1.4',
       commit: 'Dragged skill icon now attaches to the pointer outside the list',
-      author: 'Der Dachs',
+      author: 'addiinnocent',
       status: 'pending',
       lastEdited: '29/10/2026 12:00'
     },
