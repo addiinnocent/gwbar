@@ -179,6 +179,18 @@ export default async function Changelog() {
       author: 'addiinnocent',
       status: 'pending',
       lastEdited: '29/10/2026 12:00'
+    }, {
+      branch: '1.5',
+      commit: 'Attribute points shown in the team view',
+      author: 'addiinnocent',
+      status: 'pending',
+      lastEdited: '29/10/2026 14:30'
+    }, {
+      branch: '1.5',
+      commit: 'Share teams and builds via URL',
+      author: 'addiinnocent',
+      status: 'pending',
+      lastEdited: '29/10/2026 14:30'
     },
   ];
   data.reverse();

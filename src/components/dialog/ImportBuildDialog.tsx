@@ -33,12 +33,14 @@ export default function ImportBuildDialog({
   useEffect(() => {
     if (formState?.data && formState?.success) {
       const player = formState.data;
+      const nextId = team.length ? Math.max(...team.map(x => x.id)) + 1 : 1;
       newPlayer(
-        team.length+1,
+        nextId,
         player.first as string,
         player.second as string,
         player.build,
-        player.template
+        player.template,
+        (player.attributes as Record<string, number>) ?? {},
       );
       setOpen(false);
     }

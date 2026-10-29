@@ -33,7 +33,7 @@ export default function SelectSecond({
   const handleChange = (value: string) => {
     const newSearchParams = new URLSearchParams(searchParams?.toString());
     newSearchParams.set('secondary', value);
-    updatePlayer(parseInt(slug as string) || 0, value);
+    updatePlayer(parseInt(slug as string) || 0, { second: value });
 
     router.push(`?${newSearchParams.toString()}`);
   }

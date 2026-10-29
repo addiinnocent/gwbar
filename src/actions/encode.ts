@@ -50,6 +50,7 @@ export function encode(
   primary: string,
   secondary: string,
   skills: number[],
+  attributes: Record<string | number, number> = {},
 ): string {
   try {
     const template = encodeSkillbar({
@@ -57,7 +58,11 @@ export function encode(
       version: VERSION,
       primary: getenumindex(primary) || 0,
       secondary: getenumindex(secondary) || 0,
-      attributes: {},
+      attributes: Object.fromEntries(
+        Object.entries(attributes)
+          .map(([id, rank]) => [Number(id), rank])
+          .filter(([id, rank]) => Number.isInteger(id) && id >= 0 && rank > 0)
+      ) as Skillbar['attributes'],
       skills: skills,
       template: '',
     });

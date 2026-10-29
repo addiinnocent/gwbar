@@ -46,14 +46,17 @@ import {
   AccordionTrigger,
 } from '@/components/common/Accordion';
 import { Toaster } from '@/components/common/Toaster';
+import { Button } from '@/components/common/Button';
 import SkillList from '@/components/SkillList';
 import SkillBar from '@/components/SkillBar';
 import SkillOverlay from '@/components/SkillOverlay';
 import SkillCost from '@/components/SkillCost';
+import AttributeDialog from '@/components/dialog/AttributeDialog';
 import { TeamContext } from '@/context/team';
 import { noSkill } from '@/lib/noSkill';
 import { useToast } from '@/lib/useToast';
 import { getSkillTypeName } from '@/lib/skillType';
+import { formatSkillDescription } from '@/lib/skill-scaling';
 import Remeasure from '@/components/dnd/Remeasure';
 
 export default function SkillWindow({
@@ -155,19 +158,22 @@ export default function SkillWindow({
     const skill = allSkills.find(x => x.id === active.id);
     if (skill) {
       setActiveSkill(skill);
-      const { id } = toast({
+      const id = parseInt(slug as string) || 1;
+      const player = team.find(x => x.id === id);
+      const rank = Number(player?.attributes?.[String(skill.attribute)] ?? 0);
+      const { id: tid } = toast({
         title: skill?.pve_name,
         description: (
           <>
             <SkillCost skill={skill} />
             <p className="mt-2 text-xs">
-              {getSkillTypeName(skill)}:  {skill?.pve_desc}
+              {getSkillTypeName(skill)}:  {formatSkillDescription(skill.pve_desc, rank)}
             </p>
           </>
         ),
         duration: Infinity,
       });
-      toastId.current = id;
+      toastId.current = tid;
     }
   }
 
@@ -233,6 +239,16 @@ export default function SkillWindow({
       <Toaster />
       <SortableContext id="skills" items={skills} strategy={verticalListSortingStrategy}>
         <div className="mb-20 bg-gray-100 dark:bg-gray-800">
+          <div className="px-2 pt-2">
+            <AttributeDialog
+              playerId={parseInt(slug as string) || 1}
+              attributes={attributes}
+            >
+              <Button variant="light">
+                Attribute Points
+              </Button>
+            </AttributeDialog>
+          </div>
           <Accordion type="multiple">
             {attributes.map(attribute => (
               <AccordionItem key={attribute.id} value={`attr-${attribute.id}`}>
