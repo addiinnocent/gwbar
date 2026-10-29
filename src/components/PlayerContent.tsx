@@ -35,7 +35,7 @@ export default function PlayerContent({
       showTemplate={false}
     >
       <div className="mt-2 flex flex-col gap-2">
-        <CopyLinkButton path={`/build/${player.template}`} />
+        <CopyLinkButton path={`/build/${encodeURIComponent(player.template)}`} />
         <Button
           variant="light"
           className="w-full"

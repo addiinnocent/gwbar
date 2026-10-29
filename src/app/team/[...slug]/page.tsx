@@ -10,15 +10,31 @@ type DecodedBuild = Awaited<ReturnType<typeof fromUrl>>;
 export default async function Page({
   params,
 }: {
-  params: Promise<{ slug: string }>
+  params: Promise<{ slug: string[] }>
 }) {
-  const slug = (await params).slug;
-  const codes = slug.split('-').filter(Boolean).slice(0, 8);
+  // template codes use a base64 alphabet that includes '/', so a shared URL
+  // may arrive split across path segments (or %-encoded) — rejoin first
+  const segments = (await params).slug;
+  const codes = segments
+    .join('/')
+    .split('-')
+    .map(code => code.trim())
+    .filter(Boolean)
+    .slice(0, 8);
 
   const results = await Promise.all(
     codes.map(code => fromUrl(code).catch(() => null))
   );
-  const builds = results.filter(Boolean) as NonNullable<DecodedBuild>[];
+  // a structurally-plausible code can still decode to nothing usable
+  // (unknown professions/skills) — only keep complete builds
+  const builds = (results.filter(Boolean) as NonNullable<DecodedBuild>[])
+    .filter(build =>
+      Boolean(build.first) &&
+      Boolean(build.second) &&
+      Array.isArray(build.build) &&
+      build.build.length === 8 &&
+      build.build.every(skill => skill && skill.pve_name)
+    );
   const invalidCount = codes.length - builds.length;
 
   if (!builds.length) {
@@ -97,7 +113,7 @@ export default async function Page({
 
       <div className="mt-4 max-w-xs m-auto">
         <CopyLinkButton
-          path={`/team/${builds.map(build => build.template).join('-')}`}
+          path={`/team/${encodeURIComponent(builds.map(build => build.template).join('-'))}`}
           label="Share this Team"
           variant="light"
         />

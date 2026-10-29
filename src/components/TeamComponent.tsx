@@ -36,7 +36,7 @@ export default function TeamComponent({
   }, [title]);
 
   const sharePath = team.length
-    ? `/team/${team.map(player => player.template).join('-')}`
+    ? `/team/${encodeURIComponent(team.map(player => player.template).join('-'))}`
     : '';
 
   return (
