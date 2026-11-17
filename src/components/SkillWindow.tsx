@@ -57,7 +57,7 @@ import { TeamContext } from '@/context/team';
 import { noSkill } from '@/lib/noSkill';
 import { useToast } from '@/lib/useToast';
 import { getSkillTypeName } from '@/lib/skillType';
-import { formatSkillDescription } from '@/lib/skill-scaling';
+import { calculateScaledValue } from '@/lib/skill-scaling';
 import Remeasure from '@/components/dnd/Remeasure';
 
 export default function SkillWindow({
@@ -245,31 +245,65 @@ export default function SkillWindow({
     }
   }
 
+  // suppress the click event that fires on the source element right after
+  // a drag ends — handleDragStart already showed the toast
+  const suppressClickUntil = useRef(0);
+
+  // description with scaling ranges ("82...172") replaced by the interpolated
+  // value for the current attribute rank, rendered bold + colored
+  function renderScaledDescription(description: string, rank: number) {
+    return description.split(/(\d+\.\.\.\d+)/g).map((part, i) => {
+      const match = part.match(/^(\d+)\.\.\.(\d+)$/);
+      if (!match) return part;
+      const value = calculateScaledValue(
+        parseInt(match[1], 10),
+        parseInt(match[2], 10),
+        rank
+      );
+      return (
+        <strong key={i} className="font-semibold text-blue-600 dark:text-blue-400">
+          {value}
+        </strong>
+      );
+    });
+  }
+
+  function showSkillToast(skill: Gw1Skill) {
+    setActiveSkill(skill);
+    const id = parseInt(slug as string) || 1;
+    const player = team.find(x => x.id === id);
+    const rank = Number(player?.attributes?.[String(skill.attribute)] ?? 0);
+    const { id: tid } = toast({
+      title: skill?.pve_name,
+      description: (
+        <>
+          <SkillCost skill={skill} />
+          <p className="mt-2 text-xs">
+            {getSkillTypeName(skill)}:  {renderScaledDescription(skill.pve_desc, rank)}
+          </p>
+        </>
+      ),
+      duration: Infinity,
+    });
+    toastId.current = tid;
+  }
+
+  function handleSkillClick(skill: Gw1Skill) {
+    if (Date.now() < suppressClickUntil.current) return;
+    dismissToast();
+    showSkillToast(skill);
+  }
+
   function handleDragStart(event: DragStartEvent) {
     const { active } = event;
     const skill = allSkills.find(x => x.id === active.id);
     if (skill) {
-      setActiveSkill(skill);
-      const id = parseInt(slug as string) || 1;
-      const player = team.find(x => x.id === id);
-      const rank = Number(player?.attributes?.[String(skill.attribute)] ?? 0);
-      const { id: tid } = toast({
-        title: skill?.pve_name,
-        description: (
-          <>
-            <SkillCost skill={skill} />
-            <p className="mt-2 text-xs">
-              {getSkillTypeName(skill)}:  {formatSkillDescription(skill.pve_desc, rank)}
-            </p>
-          </>
-        ),
-        duration: Infinity,
-      });
-      toastId.current = tid;
+      showSkillToast(skill);
     }
   }
 
   function handleDragEnd(event: DragEndEvent) {
+    suppressClickUntil.current = Date.now() + 250;
     dismissToast();
     const { active, over } = event;
     const activeContainer = active.data?.current?.sortable?.containerId;
@@ -298,6 +332,7 @@ export default function SkillWindow({
   }
 
   function handleDragCancel() {
+    suppressClickUntil.current = Date.now() + 250;
     dismissToast();
     setActiveSkill(noSkill);
   }
@@ -365,6 +400,7 @@ export default function SkillWindow({
                 <AccordionContent className="space-y-1">
                   <SkillList
                     skills={skills.filter(x => x.attribute == attribute.id)}
+                    onSelect={handleSkillClick}
                   />
                 </AccordionContent>
               </AccordionItem>
@@ -374,7 +410,7 @@ export default function SkillWindow({
       </SortableContext>
 
       <SortableContext id="build" items={build} strategy={horizontalListSortingStrategy}>
-        <SkillBar build={build} />
+        <SkillBar build={build} onSelect={handleSkillClick} />
       </SortableContext>
 
       <DragOverlay modifiers={[snapCenterToCursor]}>
