@@ -28,7 +28,12 @@ export default async function Home({
   ) || professions[0];
 
   const attributes = await prisma.gw1Attribute.findMany({
-    where: { profession: { in: [0, 7, second.id] } },
+    where: {
+      OR: [
+        { profession: { in: [0, 7] } },
+        { profession: second.id, primary: 0 },
+      ],
+    },
     orderBy: [
       { profession: 'desc' },
       { name_en: 'asc' },
@@ -75,6 +80,7 @@ export default async function Home({
           <SelectSecond
             defaultValue={second.name_en}
             professions={professions}
+            attributes={attributes}
           />
         </span>
       </span>
