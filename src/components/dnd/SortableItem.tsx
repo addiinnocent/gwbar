@@ -6,6 +6,7 @@ import { Item } from './Item';
 
 type SortableItemProps = {
   id: string | number;
+  className?: string;
   children: React.ReactNode;
 };
 
@@ -27,9 +28,9 @@ export function SortableItem(props: SortableItemProps) {
     // TouchSensor long-press; `none` would break scrolling the skill list
     touchAction: 'manipulation' as const,
   };
-  
+
   return (
-    <Item ref={setNodeRef} style={style} {...attributes} {...listeners}>
+    <Item ref={setNodeRef} className={props.className} style={style} {...attributes} {...listeners}>
       {props.children}
     </Item>
   );

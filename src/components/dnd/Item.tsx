@@ -4,9 +4,9 @@ interface ItemProps extends HTMLAttributes<HTMLDivElement> {
   children?: ReactNode;
 }
 
-export const Item = forwardRef<HTMLDivElement, ItemProps>(({ children, ...props }, ref) => {
+export const Item = forwardRef<HTMLDivElement, ItemProps>(({ children, className, ...props }, ref) => {
   return (
-    <div {...props} ref={ref}>
+    <div {...props} className={className} ref={ref}>
       {children}
     </div>
   );

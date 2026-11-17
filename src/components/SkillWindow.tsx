@@ -145,19 +145,81 @@ export default function SkillWindow({
   }
 
   /**
-   * Resolve the drop slot from the live bar geometry instead of dnd-kit's
-   * cached droppable rects: while hovering, slots displace to make room and
-   * cached rects drift (notably on mobile), so drops landed several slots off.
+   * Last pointer position. The DragOverlay is snapped center-to-cursor, so
+   * users aim with the pointer — the dragged item's translated rect center
+   * carries the grab offset (up to half a slot) and made edge slots
+   * (notably 7/8) land one slot early.
+   */
+  const pointerPos = useRef<{ x: number; y: number } | null>(null);
+
+  useEffect(() => {
+    const onMove = (e: PointerEvent) => {
+      pointerPos.current = { x: e.clientX, y: e.clientY };
+    };
+    window.addEventListener('pointermove', onMove);
+    window.addEventListener('pointerdown', onMove);
+    return () => {
+      window.removeEventListener('pointermove', onMove);
+      window.removeEventListener('pointerdown', onMove);
+    };
+  }, []);
+
+  /**
+   * Resolve the drop slot from live bar geometry + the pointer position
+   * instead of dnd-kit's cached droppable rects: while hovering, slots
+   * displace to make room and cached rects drift (notably on mobile), so
+   * drops landed several slots off.
+   *
+   * Each slot element is measured individually (live rects include the
+   * displacement transform) and the slot with the nearest center wins — this
+   * stays correct across gaps, overflow and mid-drag slot shifts. A
+   * `barIndexAt` return of null means "outside the bar".
    */
   function barIndexAt(active: Active): number | null {
     const bar = document.getElementById('gw-skill-bar');
+    if (!bar || bar.children.length === 0) return null;
+
+    // pointer-first; fall back to the translated rect center (keyboard drags)
     const translated = active.rect.current.translated;
-    if (!bar || !translated) return null;
-    const rect = bar.getBoundingClientRect();
-    const x = translated.left + translated.width / 2;
-    if (x < rect.left || x > rect.right) return null;
-    const slotWidth = rect.width / 8;
-    return Math.min(7, Math.max(0, Math.floor((x - rect.left) / slotWidth)));
+    const x = pointerPos.current?.x ?? (translated
+      ? translated.left + translated.width / 2
+      : null);
+    const y = pointerPos.current?.y ?? (translated
+      ? translated.top + translated.height / 2
+      : null);
+    if (x === null) return null;
+
+    const barRect = bar.getBoundingClientRect();
+    const rects = Array.from(bar.children).map(el =>
+      el.getBoundingClientRect()
+    );
+
+    // vertical check: the pointer must be near the bar for a bar drop;
+    // otherwise falls back to dnd-kit's own collision result
+    if (y !== null) {
+      const vMargin = barRect.height / 2 + 24;
+      if (y < barRect.top - vMargin || y > barRect.bottom + vMargin) {
+        return null;
+      }
+    }
+
+    let nearest = 0;
+    let nearestDist = Infinity;
+    rects.forEach((r, i) => {
+      const dist = Math.abs(r.left + r.width / 2 - x);
+      if (dist < nearestDist) {
+        nearestDist = dist;
+        nearest = i;
+      }
+    });
+
+    // reject drops clearly outside the horizontal extent of the bar
+    const first = rects[0];
+    const last = rects[rects.length - 1];
+    if (x < first.left - first.width / 2 || x > last.right + last.width / 2) {
+      return null;
+    }
+    return nearest;
   }
 
   function throwItem(active: Active) {
