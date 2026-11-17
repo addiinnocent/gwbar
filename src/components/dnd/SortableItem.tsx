@@ -7,6 +7,7 @@ import { Item } from './Item';
 type SortableItemProps = {
   id: string | number;
   className?: string;
+  onClick?: React.MouseEventHandler<HTMLElement>;
   children: React.ReactNode;
 };
 
@@ -30,7 +31,7 @@ export function SortableItem(props: SortableItemProps) {
   };
 
   return (
-    <Item ref={setNodeRef} className={props.className} style={style} {...attributes} {...listeners}>
+    <Item ref={setNodeRef} className={props.className} style={style} onClick={props.onClick} {...attributes} {...listeners}>
       {props.children}
     </Item>
   );
