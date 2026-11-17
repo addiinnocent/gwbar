@@ -40,3 +40,7 @@ Overview of all changes made, starting from the initial version.
 | 1.6 | Fixed drop slot resolution using live bar geometry | addiinnocent | live | 17/11/2026 10:00 |
 | 1.6 | Skill bar centered at the bottom of the screen | addiinnocent | live | 17/11/2026 10:00 |
 | 1.6 | Added the 17 previously missing skill icons (fetched from the wiki) | addiinnocent | live | 17/11/2026 11:30 |
+| 1.6 | Skill toast opens when clicking a skill in the list or bar | addiinnocent | live | 17/11/2026 15:00 |
+| 1.6 | Scaled values in the skill toast are highlighted | addiinnocent | live | 17/11/2026 15:00 |
+| 1.6 | Second profession switch resets its attribute ranks | addiinnocent | live | 17/11/2026 15:00 |
+| 1.6 | Second profession's primary attribute no longer selectable | addiinnocent | live | 17/11/2026 15:00 |
