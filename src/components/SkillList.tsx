@@ -8,14 +8,17 @@ import { SortableItem } from '@/components/dnd/SortableItem';
 import { parseSkillName } from '@/lib/utils';
 
 export default function SkillList({
-  skills
+  skills,
+  onSelect,
 }: {
   skills: Gw1Skill[],
+  onSelect?: (skill: Gw1Skill) => void,
 }) {
   return skills.map((skill) => (
     <SortableItem
       key={skill.id}
       id={skill.id}
+      onClick={() => onSelect?.(skill)}
     >
       <div className="flex flex-row items-center gap-2 bg-gray-200 dark:bg-gray-700">
         <div className="relative w-10 h-10">

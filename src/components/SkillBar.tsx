@@ -12,9 +12,11 @@ type Gw1Skill = Gw1SkillDesc & Gw1SkillData & {
 };
 
 export default function SkillBar({
-  build
+  build,
+  onSelect,
 }: {
   build: Gw1Skill[],
+  onSelect?: (skill: Gw1Skill) => void,
 }) {
   return (
     <div className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-2xl pb-2 px-8 bg-white dark:bg-black">
@@ -24,7 +26,8 @@ export default function SkillBar({
           // (flex items with min-width:auto keep their 100px image width and
           // the last slots end up outside the bar element, breaking drop
           // detection on slots 7/8)
-          <SortableItem key={skill.id} id={skill.id} className="min-w-0 flex-1">
+          // empty slots (id <= 0) are not selectable
+          <SortableItem key={skill.id} id={skill.id} className="min-w-0 flex-1" onClick={() => skill.id > 0 && onSelect?.(skill)}>
             <div className="relative aspect-square w-full">
               <Image
                 src={parseSkillName(skill.pve_name)}
