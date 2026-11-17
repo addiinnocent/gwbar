@@ -39,3 +39,4 @@ Overview of all changes made, starting from the initial version.
 | 1.6 | Fixed mobile drags into the skill bar being cancelled by browser panning | addiinnocent | live | 17/11/2026 10:00 |
 | 1.6 | Fixed drop slot resolution using live bar geometry | addiinnocent | live | 17/11/2026 10:00 |
 | 1.6 | Skill bar centered at the bottom of the screen | addiinnocent | live | 17/11/2026 10:00 |
+| 1.6 | Added the 17 previously missing skill icons (fetched from the wiki) | addiinnocent | live | 17/11/2026 11:30 |
