@@ -14,9 +14,10 @@ Guild Wars 1 players planning builds — solo (single bar) or for group content 
 
 ### 1. Build editor (`/{slot}/{Profession}?secondary={X}`)
 - Pick a **primary profession** (all 10 core professions) and optionally a **secondary profession** from a dropdown.
-- Browse the full skill list for the chosen combination (attributes of primary + secondary, including shared attributes).
+- Browse the full skill list for the chosen combination (primary + shared attributes, plus the secondary's attributes except its primary one — a secondary cannot use its primary attribute, matching the game).
 - Drag skills from the list into the **8-slot skill bar** (drag, drop, swap, remove; keyboard/touch supported). Elite skills are visually highlighted.
-- Hover a skill to see full details: type, cost (energy / adrenaline / upkeep / sacrifice), activation, recharge, description (PvE vs PvP variants distinguished).
+- Click (or start dragging) a skill to see full details in a toast: type, cost (energy / adrenaline / upkeep / sacrifice), activation, recharge, description with attribute-scaled values (PvE vs PvP variants distinguished).
+- Distribute attribute points (200-point budget) in the attribute dialog; switching the secondary profession resets the ranks spent in its attributes.
 - Every change re-encodes the bar into a valid **Guild Wars template code** (type 14), shown copy-pasteable on the team page.
 
 ### 2. Team builds (`/teams`, `/teams/[slug]`)
@@ -32,12 +33,11 @@ Guild Wars 1 players planning builds — solo (single bar) or for group content 
 
 ### 4. Landing & changelog (`/`, `/changelog`)
 - Landing page with "Create a Build" entry point and team management link.
-- Hand-maintained changelog page (version, status, author).
+- Hand-maintained changelog, stored as a markdown table in `docs/changelog.md` and rendered by the `/changelog` page (version, status, author).
 
 ## Explicitly out of scope (current state)
 
 - **No accounts / server persistence** — teams and builds live in `localStorage` only; clearing browser data loses everything. Sharing happens exclusively via URL/template codes.
-- **No attribute-point editor** — template encoding writes an empty attribute section; attributes are displayed but not editable.
 - **No i18n switch** — database columns exist for German, UI renders English only.
 - **No database-backed teams** — Postgres stores game reference data (professions, attributes, skills), never user content.
 

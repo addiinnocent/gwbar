@@ -55,10 +55,10 @@ Client-only context:
 | Route | Type | Behavior |
 |---|---|---|
 | `/` | static | landing, NewBuildDialog |
-| `/[slot]/<Profession>` ×10 | dynamic (`searchParams`) | server component; queries professions, attributes (`profession in [0, primary, secondary]`), skills; renders SkillWindow |
+| `/[slot]/<Profession>` ×10 | dynamic (`searchParams`) | server component; queries professions, attributes (`OR: [profession in [0, primary], { profession: secondary, primary: 0 }]` — the secondary's primary attribute is excluded), skills filtered to those attribute ids; renders SkillWindow |
 | `/build/[slug]` | dynamic | slug = raw template code; decoded server-side via `fromUrl` |
 | `/teams`, `/teams/[slug]` | client | localStorage-backed via TeamContext |
-| `/changelog` | static | hardcoded inline array in `page.tsx` — user-facing changes are logged here manually (status `pending` until the PR is live), no DB/git integration |
+| `/changelog` | static | parses `docs/changelog.md` (markdown table) at build time — user-facing changes are logged in that file manually (status `pending` until the PR is live), no DB/git integration |
 
 The 10 profession pages are **hardcoded copies** (one per profession) — adding a profession means adding a page. Prerendering hits the live Neon DB (`DATABASE_URL` from `.env`).
 
@@ -68,14 +68,17 @@ The 10 profession pages are **hardcoded copies** (one per profession) — adding
   - TouchSensor activates on **long-press** (`delay: 250, tolerance: 5`), PointerSensor on `delay: 150` — without constraints, touch scrolling gets hijacked into drags (mobile bug).
   - `onDragCancel` must reset `activeSkill` and dismiss the drag toast — cancelled touch drags otherwise leave the overlay + infinite toast blocking the UI.
   - Empty slots must get **unique negative ids** (`-(index + 1)`) — sharing `noSkill` verbatim creates duplicate droppable ids, which breaks dnd-kit's registry and makes drops land in wrong slots.
+  - **Drop slots resolve from the pointer position + live slot rects**, not dnd-kit's collision result: `barIndexAt()` (`SkillWindow.tsx`) tracks the last pointer position globally, measures each bar slot element individually, and picks the slot with the nearest center (with vertical/horizontal rejection margins); keyboard drags fall back to the translated rect center.
   - **Known dnd-kit bug (#1786, core 6.3.1):** dnd-kit only re-measures droppable rects when items change *mid-drag*. Our lists mutate programmatically in `onDragEnd` (add/throw/swap), so the rect cache goes stale and hit areas diverge from visuals. Mitigated by `src/components/dnd/Remeasure.tsx` (child of `DndContext`, calls `measureDroppableContainers` ~350ms after any list change — deferred so mid-transition rects aren't captured).
+  - Skill toast (`useToast`, `duration: Infinity`) shows on **drag start and on click** (`SortableItem` accepts `onClick`); selecting another skill swaps the text, and clicks fired on the source element right after a drag end are suppressed for 250ms via a ref in `SkillWindow.tsx`.
   - Explicit sorting strategies: `verticalListSortingStrategy` (skills list), `horizontalListSortingStrategy` (build bar). No `snapCenterToCursor` — redundant with `DragOverlay` and it shifts the real list item under the cursor mid-drag.
 - **Radix primitives** (accordion, dialog, select, toast, slot) wrapped by shadcn/Tremor-style components in `src/components/common/`
 - **tailwind-variants + clsx + tailwind-merge** for styling; **@remixicon/react** icons; `@vercel/analytics` in root layout
 
 ## Assets & icon resolution
 
-- `public/gw_images_large/` — 1349 skill images (100px), wiki-scraped filenames
+- `public/gw_images_large/` — 1366 skill images (100px/64px), wiki-scraped filenames
+- Missing icons are fetched via `node scripts/fetch-wiki-icons.mjs`: reads skill names from `sql/gw1_skilldesc_en.sql`, resolves them through the wiki's MediaWiki API (prefers `File:<Name> (large).jpg`, falls back to `File:<Name>.jpg`), and writes `100px-<Name_with_underscores>_(large).jpg` into `public/gw_images_large/` (throttled 150ms; exits non-zero if any icon fails)
 - `public/class_icons/` — profession tango icons (20/200px)
 - `parseSkillName()` (`src/lib/utils.ts`) maps `pve_name` → `100px-{Name_with_underscores}_(large).jpg`; **requires exact name match** — mismatched names break icons (known issue with anniversary elites)
 - Template codes double as URL paths — base64 alphabet is URL-safe here (no `+/` usage in practice for type-14 codes)

@@ -52,9 +52,11 @@
 
 ## UI conventions
 
-- **User-facing changes go in the changelog** — `src/app/changelog/page.tsx` (`/changelog` route) holds a hardcoded inline array; prepend new rows with branch/version, short description, status (`live`/`pending` until merged), and a `DD/MM/YYYY HH:MM` timestamp. No DB/git integration.
+- **User-facing changes go in the changelog** — `docs/changelog.md` (a markdown table, parsed at build time by `/changelog`); prepend new rows with version, short description, author, status (`live`/`pending` until merged), and a `DD/MM/YYYY HH:MM` timestamp. No DB/git integration.
 - Style via `src/components/common/` wrappers (tailwind-variants); don't style Radix primitives inline.
-- Skill images: 100px versions from `gw_images_large`; profession icons from `class_icons` (`{Name_en}-tango-icon-200.png`).
+- Skill images: 100px versions from `gw_images_large`; profession icons from `class_icons` (`{Name_en}-tango-icon-200.png`). Missing icons: run `node scripts/fetch-wiki-icons.mjs` instead of hand-naming files.
+- Skill bar is a **centered fixed-bottom bar** (`left-1/2 -translate-x-1/2`) — keep it centered when touching layout.
+- Second-profession switches must **reset the ranks spent in its attributes** (`SelectSecond.tsx` filters `player.attributes` down to common + first-profession entries) — the secondary's primary attribute is excluded server-side (`primary: 0` in the page queries), so stale ranks there would silently break the 200-point budget.
 - New UI text goes in English — the de columns exist but the UI doesn't consume them yet.
 
 ## Commits
